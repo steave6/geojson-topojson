@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:geojson": "node --max-old-space-size=4820 --year=2018 resources/N03-18_180101.geojson"
+    "build:geojson": "node --max-old-space-size=4820 ./splitByDistricts/index.js --year=2018 resources/N03-18_180101.geojson"
   },
   "author": "",
   "license": "ISC",
