@@ -1,10 +1,15 @@
 #! /usr/bin/env node
-const { Observable, from, of, fromEvent } = require('rxjs')
-const { map, reduce, groupBy, mergeMap, toArray } = require('rxjs/operators')
+const argv = require('minimist')(process.argv.slice(2))
+const { fromEvent } = require('rxjs')
+const { map, groupBy, mergeMap, toArray, takeUntil } = require('rxjs/operators')
 const JSONStream = require('JSONStream')
 const fs = require('fs')
+const path = require('path')
 
-main()
+main({
+  file: argv._.slice(-1).pop(),
+  year: argv.year
+})
 
 function getStream (file) {
   const stream = fs.createReadStream(file, 'utf-8')
@@ -14,9 +19,12 @@ function getStream (file) {
   return stream.pipe(parser)
 }
 
-function main() {
-  const fileLocation = process.argv.slice(-1).pop()
-  fromEvent(getStream(fileLocation), 'data').pipe(
+function main({file, year}) {
+  const fileLocation = file
+  const outYear = '' + (year || '')
+  const fileStream = getStream(fileLocation)
+  const geoJsonObservable = fromEvent(fileStream, 'data').pipe(
+    takeUntil(fromEvent(fileStream, 'end')),
     map(data => {
       const {type, properties, geometry} = data;
       let objData = {
@@ -36,16 +44,35 @@ function main() {
       }
       return {featureCollection: objData, code: properties.N03_007}
     }),
-    groupBy(({code, featureCollection}) => code),
+    groupBy(({code}) => code),
     mergeMap(group => group.pipe(toArray()))
-  ).subscribe(data => {
-    console.log(data)
+  )
+  
+  const geoJsonPath = path.join(path.resolve(__dirname), '../geojson')
+  geoJsonObservable.subscribe((data) => {
+    let master = data.pop()
+    if (master.code) {
+      data.forEach((elm) => {
+        master.featureCollection.features = master.featureCollection.features.concat(elm.featureCollection.features)
+      })
+    } else {// code is null
+      master.featureCollection = [master.featureCollection]
+      data.forEach((elm) => {
+        master.featureCollection = master.featureCollection.concat(elm.featureCollection)
+      })
+    }
+    const filePath = path.join(geoJsonPath, outYear)
+    fs.mkdir(filePath, {recursive: true, mode: 0o755}, (err) => {
+      if (err) throw 'Error on mkdir: ' + err
+      fs.writeFile(path.join(filePath, `${master.code}.geojson`), JSON.stringify(master.featureCollection), 'utf-8', (err) => {
+        if (err) {
+          console.log('Error on write: ', err)
+        }
+      })
+    });
   },
   err => console.log('SBSCRIBE ERROR: ',err),
   () => {
     console.log('COMPLETED')
-    sys.stdout.write('some data', () => {
-      console.log('The data has been flushed');
-    });
   })
 }
