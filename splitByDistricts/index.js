@@ -30,8 +30,8 @@ function main({file, year}) {
       let objData = {
         type: 'FeatureCollection',
         code: properties.N03_007,
-        crs: { type: 'name', properties: { name: 'urn:ogc:def:crs:EPSG::6668' } },
         properties: {
+          crs: { type: 'name', properties: { name: 'urn:ogc:def:crs:EPSG::6668' } },
           coordinateCode: 'urn:ogc:def:crs:EPSG::6668',
           prefecture: properties.N03_001,
           branch: properties.N03_002,
