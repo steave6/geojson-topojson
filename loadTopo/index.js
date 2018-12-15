@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 const AWS = require('aws-sdk')
-const fs = require('fs')
-const path = require('path')
 const log = require('./log')
 
 const config = require('./config.json')
@@ -12,7 +10,7 @@ var docClient = new AWS.DynamoDB.DocumentClient()
 log.info('Importing movies into DynamoDB. Please wait.')
 
 var putItem = function (params) {
-  docClient.put(params, function(err, data) {
+  docClient.put(params, function(err) {
     if (err) {
       log.error('Unable to add properties', params.town, '. Error JSON:', JSON.stringify(err, null, 2))
       if (err.retryable) {
@@ -25,6 +23,12 @@ var putItem = function (params) {
   })
 }
 
+function main () {
+  console.log('main function')
+}
+
+exports.putItem = putItem
+
 if (typeof require != 'undefined' && require.main ===module) {
-  
+  main()
 }
