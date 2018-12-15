@@ -5,12 +5,15 @@ const log = require('./log')
 const config = require('./config.json')
 AWS.config.update(config)
 
-var docClient = new AWS.DynamoDB.DocumentClient()
+var dynamodb = new AWS.DynamoDB()
+var dynamoClient = new AWS.DynamoDB.DocumentClient()
 
-log.info('Importing movies into DynamoDB. Please wait.')
+function isConnect () {
 
-var putItem = function (params) {
-  docClient.put(params, function(err) {
+}
+
+function putItem (params) {
+  dynamoClient.put(params, function(err) {
     if (err) {
       log.error('Unable to add properties', params.town, '. Error JSON:', JSON.stringify(err, null, 2))
       if (err.retryable) {
@@ -24,10 +27,16 @@ var putItem = function (params) {
 }
 
 function main () {
-  console.log('main function')
+  log.info('Importing movies into DynamoDB. Please wait.')
+
 }
 
-exports.putItem = putItem
+module.exports = {
+  dynamodb: dynamodb,
+  dynamoClient: dynamoClient,
+  logger: log,
+  putItem: putItem,
+}
 
 if (typeof require != 'undefined' && require.main ===module) {
   main()

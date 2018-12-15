@@ -4,12 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npm run run:dynamodb; docker exec dynamodb_for_test bash --login -c 'cd /test/dynamodb && node test/index.js'; npm run test:stop",
+    "test": "npm run run:dynamodb; docker exec dynamodb_for_test bash --login -c 'cd /test/dynamodb && npm run test:mocha'; npm run test:stop",
+    "test:mocha": "mocha",
     "test:test": "npm run build:docker; npm run run:dynamodb; docker exec -it dynamodb_for_test 'bash'; npm run test:stop",
     "build:geojson": "node --max-old-space-size=4820 ./splitByDistricts/index.js --year=2018 resources/N03-18_180101.geojson",
     "build:docker": "docker build -t cashewnuts/dynamodb-test ./docker",
     "upload:docker": "docker push cashewnuts/dynamodb-test",
-    "run:dynamodb": "docker run --rm -d -v $(pwd):/test/dynamodb --name dynamodb_for_test cashewnuts/dynamodb-test",
+    "run:dynamodb": "docker run --rm -d -p 8000:8000 -v $(pwd):/test/dynamodb -v $HOME/.aws:/home/dynamodblocal/.aws --name dynamodb_for_test cashewnuts/dynamodb-test",
     "test:stop": "docker stop dynamodb_for_test"
   },
   "author": "",
@@ -21,5 +22,9 @@
     "rxjs": "^6.3.3",
     "topojson": "^3.0.2",
     "winston": "^3.1.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0"
   }
 }
