@@ -1,4 +1,4 @@
-var winston = require('winston');
+var winston = require('winston')
 
 const logger = winston.createLogger({
   level: 'info',
@@ -8,9 +8,10 @@ const logger = winston.createLogger({
     // - Write to all logs with level `info` and below to `combined.log` 
     // - Write all logs error (and below) to `error.log`.
     //
-    new winston.transports.File({ filename: 'error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'combined.log' })
+    new winston.transports.File({ filename: 'loadTopo-error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'loadTopo-infos.log' })
   ]
+// eslint-disable-next-line semi
 });
 
 //
@@ -20,7 +21,7 @@ const logger = winston.createLogger({
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({
     format: winston.format.simple()
-  }));
+  }))
 }
 
-module.exports = logger;
+module.exports = logger
