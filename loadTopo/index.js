@@ -45,8 +45,15 @@ function createTable (db, tableName, params) {
   })
 }
 
-function putItem (params) {
-  dynamoClient.put(params, function(err) {
+/**
+ * Put item into the DynamoDB table
+ * @param {DocumentClient} client DynamoDb Document
+ * @param {*} params Item of table
+ * @returns {void} 
+ */
+function putItem (client, params) {
+  
+  client.put(params, function(err) {
     if (err) {
       logger.error('Unable to add properties', params.town, '. Error JSON:', JSON.stringify(err, null, 2))
       if (err.retryable) {
@@ -59,6 +66,10 @@ function putItem (params) {
   })
 }
 
+/**
+ * main function as executable
+ * @returns {void}
+ */
 function main () {
   logger.info('Importing movies into DynamoDB. Please wait.')
   createTable(dynamodb, topoTableName, params).then()
