@@ -2,9 +2,12 @@ var winston = require('winston')
 const fs = require('fs')
 var path = require('path')
 var logDir = path.resolve(__dirname, '../../logs') // directory path you want to set
+
+// eslint-disable-next-line no-sync
 if (!fs.existsSync(logDir)) {
-    // Create the directory if it does not exist
-    fs.mkdirSync(logDir);
+  // Create the directory if it does not exist
+  // eslint-disable-next-line no-sync
+  fs.mkdirSync(logDir);
 }
 
 const logger = winston.createLogger({
