@@ -1,11 +1,11 @@
 module.exports = {
     "env": {
-        "es6": true,
         "node": true
     },
     "extends": "eslint:recommended",
     "parserOptions": {
-        "ecmaVersion": 2016
+        "ecmaVersion": 8,
+        "sourceType": "module"
     },
     "rules": {
         "accessor-pairs": "error",
@@ -196,6 +196,7 @@ module.exports = {
         "no-unmodified-loop-condition": "error",
         "no-unneeded-ternary": "error",
         "no-unused-expressions": "error",
+        "no-unused-vars": "error",
         "no-use-before-define": "off",
         "no-useless-call": "error",
         "no-useless-computed-key": "error",
@@ -220,7 +221,7 @@ module.exports = {
         "padding-line-between-statements": "error",
         "prefer-arrow-callback": "off",
         "prefer-const": "off",
-        "prefer-destructuring": "error",
+        "prefer-destructuring": "off",
         "prefer-numeric-literals": "error",
         "prefer-object-spread": "error",
         "prefer-promise-reject-errors": "error",
@@ -284,5 +285,16 @@ module.exports = {
             "error",
             "never"
         ]
-    }
+    },
+    "overrides": [
+        {
+            "files": ["**/*.test.js"],
+            "rules": {
+                "no-console": "off",
+                "no-undef": "off",
+                "no-unused-expressions": "off",
+                "no-unused-vars": "off",
+            }
+        }
+    ]
 };
