@@ -11,6 +11,16 @@ describe('TEST for loadTopo.js', function() {
         loadTopo.should.have.property('dynamoClient')
         loadTopo.should.have.property('logger')
         loadTopo.should.have.property('putItem')
+        loadTopo.should.have.property('listTables')
+        loadTopo.should.have.property('createTable')
+      })
+    })
+    describe('#Functionality', function() {
+      it('should get list tables', function() {
+        loadTopo.listTables(dynamodb).then(tables => {
+          assert.isArray(tables)
+          done()
+        })
       })
     })
   })

@@ -2,9 +2,9 @@ var winston = require('winston')
 const fs = require('fs')
 var path = require('path')
 var logDir = path.resolve(__dirname, '../../logs') // directory path you want to set
-if ( !fs.existsSync( logDir ) ) {
+if (!fs.existsSync(logDir)) {
     // Create the directory if it does not exist
-    fs.mkdirSync( logDir );
+    fs.mkdirSync(logDir);
 }
 
 const logger = winston.createLogger({

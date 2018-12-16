@@ -1,0 +1,15 @@
+{
+  "TableName": "GeoJapanDistricts",
+  "KeySchema": [
+    { "AttributeName": "year", "KeyType": "HASH"},
+    { "AttributeName": "code", "KeyType": "RANGE" }
+  ],
+  "AttributeDefinitions": [
+   { "AttributeName": "year", "AttributeType": "N" },
+   { "AttributeName": "code", "AttributeType": "S" }
+  ],
+  "ProvisionedThroughput": {       
+    "ReadCapacityUnits": 20, 
+    "WriteCapacityUnits": 10
+  }
+}
