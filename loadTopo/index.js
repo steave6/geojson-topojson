@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 const AWS = require('aws-sdk')
-const logger = require('./utils/logger.js')
+const { from, fromEvent } = require('rxjs')
+const { map, flatMap, takeUntil } = require('rxjs/operators')
+const JSONStream = require('JSONStream')
+const path = require('path')
+const logger = require('./utils/logger')
+const DirectoryWalker = require('./utils/directory-walker')
 
 const config = require('./config.json')
 AWS.config.update(config)
@@ -67,12 +72,53 @@ function putItem (client, params) {
 }
 
 /**
+ * Load json files with name
+ * @param {Array<{file, rs}>} rsList list of json info
+ * @returns {Observable} rsObservable
+ */
+function getLoadJsonObservable (rsList) {
+  const rsObservable = from(rsList).pipe(
+    map(({file, rs}) => {
+      logger.info(file)
+      const name = path.parse(file).name
+      const parser = JSONStream.parse()
+      const stream = rs.pipe(parser)
+      // error log
+      stream.on('error', (err) => logger.error(err))
+      // get Promised json
+      const pjson = fromEvent(stream, 'data').pipe(
+        takeUntil(fromEvent(stream, 'end')),
+      )
+      .toPromise()
+      return pjson.then(json => ({name, json}))
+    }),
+    flatMap(data => data)
+  )
+  return rsObservable
+}
+
+/**
  * main function as executable
  * @returns {void}
  */
-function main () {
+async function main () {
   logger.info('Importing movies into DynamoDB. Please wait.')
-  createTable(dynamodb, topoTableName, params).then()
+  await createTable(dynamodb, topoTableName, params)
+  let dirWalker = new DirectoryWalker({dir: '', ext: 'topojson'})
+  const rsList = await dirWalker.getAllReadFileStream()
+  const jsonObservable = getLoadJsonObservable(rsList)
+
+  jsonObservable.subscribe(({name, json}) => {
+    let params = {
+      TableName: 'GeoJapanDistricts',
+      Item: {
+        year: '2018',
+        code: name,
+        topo: json
+      }
+    }
+    putItem(dynamoClient, params)
+  })
 }
 
 module.exports = {
@@ -81,7 +127,8 @@ module.exports = {
   logger,
   putItem,
   listTables,
-  createTable
+  createTable,
+  getLoadJsonObservable
 }
 
 if (typeof require != 'undefined' && require.main ===module) {

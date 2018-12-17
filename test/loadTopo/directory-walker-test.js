@@ -48,7 +48,9 @@ describe('TEST for directory-walker.js', function() {
           const dirWalker = new DirectoryWalker()
           return dirWalker.getAllReadFileStream({dir, ext: 'topojson'})
             .then(list => {
-              list.forEach(rs => {
+              list.forEach(({file, rs}) => {
+                expect(file).not.to.be.empty.and.to.be.string
+                assert.match(path.parse(file).name, /[0-9]+/u)
                 expect(rs.closed).to.be.false
                 rs.on('close', () => expect(rs.closed).to.be.true)
                 rs.close()

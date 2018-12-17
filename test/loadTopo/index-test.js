@@ -1,6 +1,8 @@
 const { assert, expect } = require('chai')
 const should = require('chai').should()
-const loadTopo = require('../../loadTopo/index.js')
+const path = require('path')
+const loadTopo = require('../../loadTopo/index')
+const DirectoryWalker = require('../../loadTopo/utils/directory-walker')
 const { dynamodb, dynamoClient } = loadTopo
 
 // suppress console prints
@@ -16,6 +18,7 @@ describe('TEST for loadTopo.js', function() {
         loadTopo.should.have.property('putItem')
         loadTopo.should.have.property('listTables')
         loadTopo.should.have.property('createTable')
+        loadTopo.should.have.property('getLoadJsonObservable')
       })
     })
     describe('#listTables()', function() {
@@ -23,6 +26,18 @@ describe('TEST for loadTopo.js', function() {
         return loadTopo.listTables(dynamodb)
           .then(tables => {
             expect(tables).to.be.an.instanceOf(Array)
+          })
+      })
+    })
+    describe('#getLoadJsonObservable()', function() {
+      it('should be able to subscribe name and json data', async () => {
+        const dirWalker = new DirectoryWalker()
+        const dir = path.resolve(__dirname, './resources')
+        const rsList = await dirWalker.getAllReadFileStream({dir, ext: 'topojson'})
+        return loadTopo.getLoadJsonObservable(rsList)
+          .subscribe(({name, json}) => {
+            expect(name).not.to.be.empty.and.to.be.string
+            expect(json).to.include.all.keys('type', 'objects', 'transform')
           })
       })
     })

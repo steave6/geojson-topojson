@@ -54,6 +54,9 @@ module.exports = class DirectoryWalker {
    */
   getAllReadFileStream ({dir, ext}) {
     return this.getAllFiles({dir, ext})
-      .then(list => list.map(element => fs.createReadStream(element)))
+      .then(list => list.map(file => ({
+          file,
+          rs: fs.createReadStream(file)
+        })))
   }
 }
