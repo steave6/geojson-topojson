@@ -40,6 +40,7 @@ const logger = createLogger({
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new transports.Console({
     name: 'console',
+    prettyPrint: true,
     format: logformat
   }))
 }
