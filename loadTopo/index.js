@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const AWS = require('aws-sdk')
-const logger = require('./log')
+const logger = require('./utils/logger.js')
 
 const config = require('./config.json')
 AWS.config.update(config)
