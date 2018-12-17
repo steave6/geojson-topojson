@@ -1,6 +1,6 @@
-const assert = require('chai').assert
+const { assert, expect } = require('chai')
 const should = require('chai').should()
-const loadTopo = require('../loadTopo/index.js')
+const loadTopo = require('../../loadTopo/index.js')
 const { dynamodb, dynamoClient } = loadTopo
 
 // suppress console prints
@@ -18,23 +18,22 @@ describe('TEST for loadTopo.js', function() {
         loadTopo.should.have.property('createTable')
       })
     })
-    describe('#Functionality', function() {
-      it('should get list tables', function(done) {
-        loadTopo.listTables(dynamodb).then(tables => {
-          assert.isArray(tables)
-        })
-        .finally(done)
+    describe('#listTables()', function() {
+      it('should get list tables', function() {
+        return loadTopo.listTables(dynamodb)
+          .then(tables => {
+            expect(tables).to.be.an.instanceOf(Array)
+          })
       })
     })
   })
-  describe('DynamoDB', function(done) {
+  describe('DynamoDB', function() {
     describe('#Connect', function() {
       it('should connect dynamodb', function() {
-        dynamodb.listTables({}, (err, data) => {
-          assert.notExists(err)
-          assert.isArray(data)
-          done()
-        })
+        return dynamodb.listTables({}).promise()
+          .then((data) => {
+            assert.isArray(data.TableNames)
+          })
       })
     })
   })

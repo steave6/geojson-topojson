@@ -1,6 +1,7 @@
 module.exports = {
     "env": {
-        "node": true
+        "node": true,
+        "es6": true
     },
     "extends": "eslint:recommended",
     "parserOptions": {
@@ -103,7 +104,7 @@ module.exports = {
             "error",
             "separate-lines"
         ],
-        "multiline-ternary": "error",
+        "multiline-ternary": ["error", "never"],
         "new-cap": "error",
         "new-parens": "error",
         "newline-after-var": "off",
@@ -181,7 +182,7 @@ module.exports = {
         "no-sync": "error",
         "no-tabs": "error",
         "no-template-curly-in-string": "error",
-        "no-ternary": "error",
+        "no-ternary": "off",
         "no-throw-literal": "off",
         "no-trailing-spaces": [
             "error",
@@ -192,7 +193,7 @@ module.exports = {
         ],
         "no-undef-init": "error",
         "no-undefined": "error",
-        "no-underscore-dangle": "error",
+        "no-underscore-dangle": "off",
         "no-unmodified-loop-condition": "error",
         "no-unneeded-ternary": "error",
         "no-unused-expressions": "error",
@@ -288,7 +289,7 @@ module.exports = {
     },
     "overrides": [
         {
-            "files": ["**/*.test.js"],
+            "files": ["**/*-test.js"],
             "rules": {
                 "no-console": "off",
                 "no-undef": "off",
