@@ -63,7 +63,7 @@ describe('TEST for directory-walker.js', function() {
       describe('#getAllFiles()', function() {
         it('should get error because of no arguments', function() {
           const dirWalker = new DirectoryWalker()
-          return should.throw(() => dirWalker.getAllFiles())
+          return dirWalker.getAllFiles().should.eventually.be.rejected
         })
       })
       describe('#getAllReadFileStream()', function() {

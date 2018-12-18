@@ -10,16 +10,17 @@ module.exports = class DirectoryWalker {
    */
   constructor (params) {
     let {dir, ext} = params || {}
-    this.dir = dir
-    this.ext = ext
+    this.dir = dir || ''
+    this.ext = ext || ''
   }
 
   /**
    * get All the files that has topojson extention
-   * @param {String} dir path of target files
+   * @param {String} params path of target files
    * @returns {Array<String>} files array of files
    */
-  getAllFiles ({dir, ext}) {
+  getAllFiles (params) {
+    let {dir, ext} = params || {}
     let _dir = dir || this.dir
     let _ext = ext || this.ext
     return new Promise((resolve, reject) => {
@@ -49,11 +50,11 @@ module.exports = class DirectoryWalker {
 
   /**
    * Get the stream of files
-   * @param {String} dir dir of files
+   * @param {String} params dir and ext
    * @return {Promise<ReadableStream>} rs
    */
-  getAllReadFileStream ({dir, ext}) {
-    return this.getAllFiles({dir, ext})
+  getAllReadFileStream (params) {
+    return this.getAllFiles(params)
       .then(list => list.map(file => ({
           file,
           rs: fs.createReadStream(file)

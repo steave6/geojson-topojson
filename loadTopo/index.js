@@ -13,8 +13,7 @@ AWS.config.update(config)
 const dynamodb = new AWS.DynamoDB()
 const dynamoClient = new AWS.DynamoDB.DocumentClient()
 
-const params = require('./schema-GeoJapanDistricts.json')
-const topoTableName = 'topoJson'
+const schemaGeoParams = require('./schema-GeoJapanDistricts.json')
 
 /**
  * get table names of dynamodb
@@ -24,30 +23,41 @@ const topoTableName = 'topoJson'
  */
 async function listTables (db) {
   const tableList = await db.listTables({}).promise()
-  logger.info(tableList)
+  logger.info(`tableList: ${JSON.stringify(tableList)}`)
   return tableList.TableNames
 }
 
 /**
  * Create dynamodb tables
  * @param {DynamoDB} db dynamoDB object
- * @param {String} tableName table name of dynamodb
  * @param {Object} params table schemas
  * @returns {Promise} null of promise
  */
-function createTable (db, tableName, params) {
+function createTable (db, params) {
+  return db.createTable(params).promise()
+    .then((data) => {
+      logger.info(`Created table: ${JSON.stringify(data)}`)
+      return data
+    })
+    .catch(err => {
+      if (err.code === 'ResourceInUseException') {
+        logger.info(`createTable: ${err.message}`)
+      } else {
+        logger.error(`createTable: Unable to create table: ${JSON.stringify(err)}`)
+        throw err
+      }
+    })
+}
 
-  return listTables(db).then(tables => {
-    if (tables.includes(tableName)) {
-      db.createTable(params, function(err, data) {
-        if (err) {
-          logger.error('Unable to create table. Error JSON:', JSON.stringify(err, null, 2))
-        } else {
-          logger.info('Created table. Table description JSON:', JSON.stringify(data, null, 2))
-        }
-      })
-    }
-  })
+function deleteTable (db, tableName) {
+  return db.deleteTable({TableName: tableName}).promise()
+    .then((data) => {
+      logger.info(`deleteTable: ${JSON.stringify(data)}`)
+      return data
+    })
+    .catch(err => {
+      logger.error(err)
+    })
 }
 
 /**
@@ -57,18 +67,41 @@ function createTable (db, tableName, params) {
  * @returns {void} 
  */
 function putItem (client, params) {
-  
-  client.put(params, function(err) {
-    if (err) {
-      logger.error('Unable to add properties', params.town, '. Error JSON:', JSON.stringify(err, null, 2))
-      if (err.retryable) {
-        logger.info('Retry on error')
-        putItem(params)
+  return new Promise((resolve, reject) => {
+    client.put(params, (err) => {
+      if (err) {
+        if (err.retryable) {
+          logger.info('Retry on error')
+          putItem(client, params)
+        } else {
+          logger.error(`putItem: Unable to add properties Error: ${JSON.stringify(err)}, ${JSON.stringify(params).substr(0, 255)}`)
+          reject(err)
+        }
+      } else {
+        logger.info(`putItem successed: ${JSON.stringify(params).substr(0, 255)}`)
+        resolve(params)
       }
-    } else {
-      logger.info('PutItem succeeded:', params.town)
-    }
+    })
   })
+}
+
+/**
+ * Get content of table
+ * @param {dynamoClient} client dynamo client
+ * @param {Object} params query parameter object
+ * @returns {Promise<Object>} query result
+ */
+function queryTable (client, params) {
+  return client.query(params).promise()
+    .then(data => {
+      logger.info(JSON.stringify(data).substr(0, 255))
+      return data
+    })
+    .catch(err => {
+      logger.error(err)
+      throw err
+    })
+
 }
 
 /**
@@ -99,35 +132,61 @@ function getLoadJsonObservable (rsList) {
 
 /**
  * main function as executable
+ * @param {String} dir of resource files
+ * @param {String} ext of extension
  * @returns {void}
  */
-async function main () {
+// eslint-disable-next-line max-statements
+async function main ({dir, ext}, callback) {
+  logger.info('Start main function')
+  if (!(dir && ext)) {
+    logger.error(`dir: ${dir}, ext: ${ext}`)
+    return
+  }
   logger.info('Importing movies into DynamoDB. Please wait.')
-  await createTable(dynamodb, topoTableName, params)
-  let dirWalker = new DirectoryWalker({dir: '', ext: 'topojson'})
+  const tableList = await listTables(dynamodb)
+  if (!tableList.includes(schemaGeoParams.TableName)) {
+    await createTable(dynamodb, schemaGeoParams)
+  }
+  let dirWalker = new DirectoryWalker({dir, ext})
   const rsList = await dirWalker.getAllReadFileStream()
   const jsonObservable = getLoadJsonObservable(rsList)
 
+  let promiseList = []
   jsonObservable.subscribe(({name, json}) => {
     let params = {
       TableName: 'GeoJapanDistricts',
       Item: {
-        year: '2018',
+        year: 2018,
         code: name,
         topo: json
       }
     }
-    putItem(dynamoClient, params)
+    logger.info(`jsonObservable: ${name}, ${JSON.stringify(params).substr(0, 255)}`)
+    const put = putItem(dynamoClient, params)
+      .catch(err => logger.error(err))
+    promiseList.push(put)
+  },
+  (err) => logger.error(err),
+  () => {
+    Promise.all(promiseList)
+      .then(() => {
+        logger.info('End main function')
+        return callback && callback()
+      })
   })
 }
 
 module.exports = {
+  main,
   dynamodb,
   dynamoClient,
   logger,
-  putItem,
   listTables,
   createTable,
+  deleteTable,
+  putItem,
+  queryTable,
   getLoadJsonObservable
 }
 

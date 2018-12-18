@@ -291,6 +291,8 @@ module.exports = {
         {
             "files": ["**/*-test.js"],
             "rules": {
+                "consistent-return": "off",
+                "global-require": "off",
                 "no-console": "off",
                 "no-undef": "off",
                 "no-unused-expressions": "off",

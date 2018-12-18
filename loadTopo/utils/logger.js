@@ -16,7 +16,7 @@ const logformat = format.combine(
     format: 'YYYY-MM-DD HH:mm:ss'
   }),
   
-  format.printf(info => `${info.level.toUpperCase()} [${info.timestamp}] ${info.label}: ${JSON.stringify(info.message)}`)
+  format.printf(info => `${(info.level || '').toUpperCase()} [${info.timestamp}] ${info.label}: ${JSON.stringify(info.message)}`)
 )
 
 const logger = createLogger({

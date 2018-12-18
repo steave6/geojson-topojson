@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "npm run run:dynamodb; docker exec dynamodb_for_test bash --login -c 'cd /test/dynamodb && npm run test:mocha'; npm run test:stop",
-    "test:mocha": "nyc --reporter=text --cache mocha test/**/*test.js",
+    "test:mocha": "nyc --reporter=text mocha test/**/*test.js",
+    "test:mocha:cache": "nyc --reporter=text --cache mocha test/**/*test.js",
     "test:test": "npm run build:docker; npm run run:dynamodb; docker exec -it dynamodb_for_test 'bash'; npm run test:stop",
     "build:geojson": "node --max-old-space-size=4820 ./splitByDistricts/index.js --year=2018 resources/N03-18_180101.geojson",
     "build:docker": "docker build -t cashewnuts/dynamodb-test ./docker",
