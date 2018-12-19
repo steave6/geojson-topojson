@@ -47,7 +47,7 @@ function main({file, year}) {
     mergeMap(group => group.pipe(toArray()))
   )
   
-  const geoJsonPath = path.join(path.resolve(__dirname), '../geojson')
+  const geoJsonPath = path.join(path.resolve(__dirname), '../resources/geojson')
   geoJsonObservable.subscribe((data) => {
     let master = data.pop()
     if (master.code) {
