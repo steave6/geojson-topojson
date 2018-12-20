@@ -1,3 +1,17 @@
+/**
+ * Logger
+ * 
+ * log level
+ *   emerg: 0, 
+ *   alert: 1, 
+ *   crit: 2, 
+ *   error: 3, 
+ *   warning: 4, 
+ *   notice: 5, 
+ *   info: 6, 
+ *   debug: 7
+ */
+
 var { createLogger, format, transports } = require('winston')
 const fs = require('fs')
 var path = require('path')
@@ -11,12 +25,11 @@ if (!fs.existsSync(logDir)) {
 }
 
 const logformat = format.combine(
-  format.label({ label: path.basename(module.parent.filename) }),
   format.timestamp({
     format: 'YYYY-MM-DD HH:mm:ss'
   }),
   
-  format.printf(info => `${(info.level || '').toUpperCase()} [${info.timestamp}] ${info.label}: ${JSON.stringify(info.message)}`)
+  format.printf(info => `${(info.level || '').toUpperCase()} [${info.timestamp}] ${info.message}`)
 )
 
 const logger = createLogger({
@@ -45,4 +58,25 @@ if (process.env.NODE_ENV !== 'production') {
   }))
 }
 
-module.exports = logger
+/**
+ * Set function name for log message
+ * @param {Winston} loggerObj Winston logger
+ * @param {String} label File name
+ * @returns {void}
+ */
+function decorateName (loggerObj, label) {
+  const methodList = ['info', 'emerg', 'alert', 'crit', 'error', 'warning', 'notice', 'info', 'debug']
+  let newLogger = Object.create(loggerObj)
+  methodList.forEach(method => {
+    newLogger[method] = function (first, ...rest) {
+      const args = [`${label}: ${JSON.stringify(first)}`, ...rest]
+      Reflect.apply(loggerObj[method], loggerObj, args)
+    }
+  });
+  return newLogger
+}
+
+module.exports = {
+  logger,
+  decorateName
+}

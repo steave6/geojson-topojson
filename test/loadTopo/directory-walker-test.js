@@ -4,7 +4,7 @@ chai.use(chaiAsPromised);
 
 const { assert, expect } = chai
 const should = require('chai').should()
-const logger = require('../../loadTopo/utils/logger.js')
+const {logger} = require('../../loadTopo/utils/logger.js')
 const DirectoryWalker = require('../../loadTopo/utils/directory-walker.js')
 
 const path = require('path')
