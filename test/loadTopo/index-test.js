@@ -28,7 +28,7 @@ const _deleteTable = async () => {
 describe('TEST for loadTopo.js', function() {
 
   describe('Main Function', function() {
-    const TableName = 'GeoJapanDistricts'
+    const TableName = 'Kant_GeoPolygonArea'
     describe('#Exists', function() {
       it('should contain properties', function() {
         loadTopo.should.have.property('main')
@@ -44,17 +44,19 @@ describe('TEST for loadTopo.js', function() {
       it('should be able to query data from DynamoDB', async () => {
         var params = {
           TableName,
-          KeyConditionExpression: '#yr = :year',
+          KeyConditionExpression: '#ccd = :ccd and #cd = :cd',
           ExpressionAttributeNames: {
-              '#yr': 'year'
+              '#cd': 'Code',
+              '#ccd': 'CountryCode'
           },
           ExpressionAttributeValues: {
-              ':year': 2018
+              ':cd': '01101',
+              ':ccd': 'JP'
           }
         }
         const result = await loadTopo.queryTable(dynamoClient, params)
         expect(result).has.keys('Count', 'Items', 'ScannedCount')
-        expect(result.Items).to.have.a.lengthOf(4)
+        expect(result.Items).to.have.a.lengthOf(1)
         return result
       })
     })
@@ -90,10 +92,10 @@ describe('TEST for loadTopo.js', function() {
      * DynamoDb Sequential Test
      */
     describe('#DB Operation: createTable() and putItem() and queryTable() and deleteTable()', function() {
-      const TableName = 'Test_GeoJapanDistricts'
+      const TableName = 'Kant_GeoPolygonArea'
       before(_deleteTable.bind({TableName}))
       it('should create table', async () => {
-        const createParams = require('../../loadTopo/schema-GeoJapanDistricts.json')
+        const createParams = require('./resources/Kant_GeoPolygonArea.json')
         createParams.TableName = TableName
         await loadTopo.createTable(dynamodb, createParams)
         const tables = await loadTopo.listTables(dynamodb)
@@ -104,9 +106,11 @@ describe('TEST for loadTopo.js', function() {
         let params = {
           TableName,
           Item: {
-            year: 2018,
-            code: '01101',
-            topo: {type: 'Topology'}
+            CountryCode: 'JP',
+            Code: '01101',
+            Year: 2018,
+            Scale: '3',
+            Topo: {type: 'Topology'}
           }
         }
         const result = await loadTopo.putItem(dynamoClient, params)
@@ -116,14 +120,14 @@ describe('TEST for loadTopo.js', function() {
       it('should be able to query data from DynamoDB', async () => {
         var params = {
           TableName,
-          KeyConditionExpression: '#cd = :code and #yr = :year',
+          KeyConditionExpression: '#cd = :cd and #ccd = :ccd',
           ExpressionAttributeNames: {
-              '#cd': 'code',
-              '#yr': 'year'
+              '#ccd': 'CountryCode',
+              '#cd': 'Code'
           },
           ExpressionAttributeValues: {
-              ':code': '01101',
-              ':year': 2018
+              ':ccd': 'JP',
+              ':cd': '01101',
           }
         }
         const result = await loadTopo.queryTable(dynamoClient, params)
@@ -132,7 +136,7 @@ describe('TEST for loadTopo.js', function() {
         return result
       })
       it('should delete table', async () => {
-        const tableName = 'GeoJapanDistricts'
+        const tableName = 'Kant_GeoPolygonArea'
         const result = await loadTopo.deleteTable(dynamodb, tableName)
         return result
       })

@@ -14,7 +14,7 @@ AWS.config.update(config)
 const dynamodb = new AWS.DynamoDB()
 const dynamoClient = new AWS.DynamoDB.DocumentClient()
 
-const schemaGeoParams = require('./schema-GeoJapanDistricts.json')
+const schemaGeoParams = require('../resources/schemas/Kant_GeoPolygonArea.json')
 
 /**
  * get table names of dynamodb
@@ -156,11 +156,13 @@ async function main ({dir, ext}, callback) {
   let promiseList = []
   jsonObservable.subscribe(({name, json}) => {
     let params = {
-      TableName: 'GeoJapanDistricts',
+      TableName: schemaGeoParams.TableName,
       Item: {
-        year: 2018,
-        code: name,
-        topo: json
+        CountryCode: 'JP',
+        Code: name,
+        Year: '2018',
+        Scale: '1',
+        Topo: json
       }
     }
     logger.info(`jsonObservable: ${name}, ${JSON.stringify(params).substr(0, 255)}`)

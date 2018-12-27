@@ -1,0 +1,30 @@
+{
+  "TableName": "Kant_GeoPolygonArea",
+  "KeySchema": [
+    { "AttributeName": "CountryCode", "KeyType": "HASH"},
+    { "AttributeName": "Code", "KeyType": "RANGE" }
+  ],
+  "AttributeDefinitions": [
+   { "AttributeName": "CountryCode", "AttributeType": "S" },
+   { "AttributeName": "Code", "AttributeType": "S" },
+   { "AttributeName": "Scale", "AttributeType": "S" }
+  ],
+  "LocalSecondaryIndexes": [ 
+    { 
+       "IndexName": "Kant_GeoPolygonArea_Scale_Index",
+       "KeySchema": [ 
+          { "AttributeName": "CountryCode", "KeyType": "HASH"},
+          { "AttributeName": "Scale", "KeyType": "RANGE" }
+       ],
+       "Projection": { 
+          "NonKeyAttributes": [ "Year" ],
+          "ProjectionType": "INCLUDE"
+       }
+    }
+ ],
+  "ProvisionedThroughput": {       
+    "ReadCapacityUnits": 10, 
+    "WriteCapacityUnits": 2
+  },
+  "BillingMode": "PROVISIONED"
+}
