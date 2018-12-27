@@ -224,7 +224,7 @@ module.exports = {
         "prefer-const": "off",
         "prefer-destructuring": "off",
         "prefer-numeric-literals": "error",
-        "prefer-object-spread": "error",
+        "prefer-object-spread": "off",
         "prefer-promise-reject-errors": "error",
         "prefer-reflect": "error",
         "prefer-rest-params": "error",
